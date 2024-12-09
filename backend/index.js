@@ -1,12 +1,13 @@
 const express = require("express");
 const { createTodo, updateTodo } = require("./types");
+const { todo } = require("./db")
 const app = express();
 
 
 app.use(express.json());
 
 
-app.post("/todo", function (req, res) {
+app.post("/todo", async function (req, res) {
 
     // validation
     const createPayload = req.body;
@@ -18,18 +19,30 @@ app.post("/todo", function (req, res) {
         return;
     }
 
+    // creating the todo in db
 
+    await todo.create({
+        title: createPayload.title,
+        description: createPayload.description,
+        completed: false
+    })
+    res.json({
+        msg: "todo created"
+    })
 
 
 })
 
-app.get("/todo", function (req, res) {
+app.get("/todo", async function (req, res) {
 
-
-
+    // get the todos from the db
+    const todos = await todo.find({});
+    res.json({
+        todos
+    })
 })
 
-app.put("/completed", function (req, res) {
+app.put("/completed", async function (req, res) {
 
     // validation
     const updatePayload = req.body;
@@ -41,6 +54,18 @@ app.put("/completed", function (req, res) {
         })
         return;
     }
+
+
+    // mark completed in db
+    await todo.update({
+        _id: req.body.id
+    }, {
+        completed: true
+    })
+    res.json({
+        msg: "todo marked as completed"
+    })
+
 
 })
 
